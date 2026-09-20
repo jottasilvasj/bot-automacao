@@ -19,7 +19,7 @@ def obter_cotacoes():
         print(f"Erro ao obter cotações: {e}")
         return None
 
-    if __name__ == "__main__":
-        resultado = obter_cotacoes()
-        print ("Cotações obtidas extraidas com sucesso:")
-        print(resultado)
+if __name__ == "__main__":
+    resultado = obter_cotacoes()
+    print("Cotações obtidas com sucesso:")
+    print(resultado)
