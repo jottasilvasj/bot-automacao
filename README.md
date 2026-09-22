@@ -1,178 +1,205 @@
 # Bot de Automação de Cotações
 
-Bot em Python que consulta cotações de dólar, euro e Bitcoin em relação ao real brasileiro e gera uma mensagem de notificação com os valores obtidos.
+Bot em Python para consultar cotações de dólar, euro e bitcoin em relação ao real e enviar notificações automáticas por Telegram. O projeto também inclui alertas de preço, conversão de moedas, histórico de variação e resumo diário para usuários assinados.
 
-> **Status:** projeto em desenvolvimento. Atualmente, a notificação é exibida no terminal; não há integração configurada com um serviço externo de mensagens.
+> Status: projeto funcional e em evolução, com integração ativa com Telegram e armazenamento local para alertas e assinantes.
 
 ## Funcionalidades
 
-- Consulta as cotações de `USD-BRL`, `EUR-BRL` e `BTC-BRL`.
-- Consome a API pública [AwesomeAPI](https://economia.awesomeapi.com.br/).
-- Converte os valores recebidos para números com duas casas decimais.
-- Formata uma mensagem em português com as cotações.
-- Trata erros de rede e evita o envio da notificação quando a consulta falha.
+- Consulta as cotações atuais de `USD-BRL`, `EUR-BRL` e `BTC-BRL` via AwesomeAPI.
+- Formata mensagens legíveis com os valores em reais.
+- Envia mensagens diretamente para o Telegram.
+- Possui menu interativo com botões no Telegram.
+- Permite conversão de valor entre moeda e reais.
+- Cria alertas de preço para dólar, euro e bitcoin.
+- Exibe variação diária das moedas.
+- Permite assinatura de resumo diário às 9h.
+- Persiste alertas e assinantes em `dados.json`.
+- Suporta execução em modo único (`--once`) para uso rápido em terminal.
 
 ## Tecnologias
 
-- Python 3.10 ou superior recomendado
+- Python 3.10+
 - `requests` — requisições HTTP
-- `beautifulsoup4` — disponível nas dependências para futuras rotinas de coleta
-- `python-dotenv` — disponível para configuração por variáveis de ambiente
+- `python-dotenv` — leitura de variáveis de ambiente
+- `python-telegram-bot` — integração com Telegram
+- `beautifulsoup4` — suporte para coleta futura ou extensão de rotinas
+- `AwesomeAPI` — fonte pública das cotações
 
 ## Estrutura do projeto
 
 ```text
 .
-├── main.py              # Ponto de entrada e orquestração do fluxo
-├── requirements.txt     # Dependências Python
+├── .env                 # variáveis de ambiente do Telegram
+├── .gitignore           # regras locais do repositório
+├── dados.json           # alertas e assinantes persistidos
+├── main.py              # ponto de entrada do projeto
+├── requirements.txt     # dependências Python
+├── README.md            # documentação do projeto
 └── src/
     ├── __init__.py
-    ├── api.py            # Formatação e saída da notificação
-    ├── scraper.py        # Consulta e interpretação das cotações
-    └── utils.py           # Utilitários (reservado para extensões)
+    ├── api.py           # formatação e envio de mensagens
+    ├── armazenamento.py # persistência de alertas e assinantes
+    ├── bot.py           # comandos e lógica do bot do Telegram
+    ├── historico.py     # variação diária das cotações
+    ├── scraper.py       # consulta das cotações na API
+    └── utils.py         # espaço reservado para utilitários adicionais
 ```
 
 ## Pré-requisitos
 
-- Python instalado — confirme com `python --version` ou `python3 --version`.
-- Acesso à internet para consultar a AwesomeAPI.
+- Python 3.10 ou superior
+- Acesso à internet para consultar a API de cotações
+- Token do bot e ID do chat do Telegram
 
 ## Instalação
 
 1. Clone o repositório:
 
-   ```bash
-   git clone https://github.com/jottasilvasj/bot-automacao.git
-   cd bot-automacao
-   ```
+```bash
+git clone https://github.com/jottasilvasj/bot-automacao.git
+cd bot-automacao
+```
 
 2. Crie e ative um ambiente virtual:
 
-   **Linux/macOS**
+Linux/macOS:
 
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-   **Windows (PowerShell)**
+Windows (PowerShell):
 
-   ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
 3. Instale as dependências:
 
-   ```bash
-   python -m pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+4. Configure as variáveis de ambiente no arquivo `.env`:
+
+```dotenv
+TELEGRAM_TOKEN=seu_token_do_bot
+TELEGRAM_CHAT_ID=seu_chat_id
+```
+
+- `TELEGRAM_TOKEN` é obrigatório para o bot funcionar.
+- `TELEGRAM_CHAT_ID` é usado pelo envio direto de mensagens da API e pode ser necessário em rotinas específicas.
+- O arquivo `.env` não deve ser versionado em ambientes reais com dados sensíveis.
 
 ## Execução
 
-Para executar o fluxo completo:
+### Bot do Telegram
 
 ```bash
 python main.py
 ```
 
-Saída esperada em caso de sucesso:
+Ao iniciar, o bot fica aguardando comandos no Telegram.
 
-```text
-Iniciando o bot de cotações...
+### Modo de execução única
 
---- [MENSAGEM DE NOTIFICAÇÃO GERADA] ---
-Cotações atuais:
-Dólar: R$ 5.25
-Euro: R$ 6.10
-Bitcoin: R$ 250000.0
-Enviado automaticamente pelo bot
--------------------------------------------
-
-fluxo executado com sucesso!
+```bash
+python main.py --once
 ```
 
-Os valores são dinâmicos e podem variar conforme o mercado e o momento da consulta.
+Esse modo executa uma consulta única e imprime a mensagem no terminal, sem iniciar o bot interativo.
+
+## Comandos do bot
+
+O bot disponibiliza os seguintes comandos:
+
+- `/start` — consulta as cotações atuais
+- `/menu` — abre menu com botões de consulta
+- `/converter <quantidade> <moeda>` — converte valor em reais
+- `/alerta <moeda> <valor>` — cria um alerta de preço
+- `/meusalertas` — lista alertas ativos
+- `/cancelaralerta <moeda>` — remove um alerta
+- `/historico` — mostra variação do dia
+- `/assinar` — assina o resumo diário às 9h
+- `/cancelar` — cancela a assinatura
+- `/ajuda` — exibe a lista de comandos
+
+Exemplos:
+
+```text
+/converter 100 USD
+/alerta dolar 5.30
+/cancelaralerta euro
+```
 
 ## Como o fluxo funciona
 
-1. `main.py` chama `obter_cotacoes()`.
-2. `src/scraper.py` faz uma requisição `GET` para:
+1. `main.py` inicia o bot ou executa o fluxo único.
+2. `src/scraper.py` consulta a API da AwesomeAPI:
 
-   ```text
-   https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,BTC-BRL
-   ```
-
-3. A resposta JSON é convertida para um dicionário com as chaves `dolar`, `euro` e `bitcoin`.
-4. `src/api.py` formata os dados em uma mensagem.
-5. A mensagem é impressa no terminal por `enviar_notificacao()`.
-
-A requisição possui timeout de 10 segundos. Em caso de falha HTTP ou de conexão, o bot informa o erro e não tenta gerar uma notificação com dados inválidos.
-
-## Uso dos módulos
-
-Consulta direta das cotações:
-
-```python
-from src.scraper import obter_cotacoes
-
-cotacoes = obter_cotacoes()
-print(cotacoes)
+```text
+https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL,BTC-BRL
 ```
 
-Formatação de uma mensagem:
+3. A resposta JSON é convertida em dicionário com as chaves `dolar`, `euro` e `bitcoin`.
+4. `src/api.py` formata uma mensagem pronta para envio.
+5. `src/bot.py` adiciona comandos, validações e jobs periódicos.
+6. `src/armazenamento.py` salva alertas e assinantes em `dados.json`.
+7. O bot verifica alertas a cada 5 minutos e envia o resumo diário conforme agendamento.
 
-```python
-from src.api import formatar_mensagem
+## Persistência de dados
 
-mensagem = formatar_mensagem({
-    "dolar": 5.25,
-    "euro": 6.10,
-    "bitcoin": 250000.00,
-})
-print(mensagem)
+O arquivo `dados.json` armazena:
+
+```json
+{
+  "alertas": [],
+  "assinantes": []
+}
 ```
 
-## Configuração
-
-O projeto contém um arquivo `.env`, mas a versão atual não depende de variáveis de ambiente para executar a consulta ou gerar a notificação. Caso seja adicionada uma integração externa — por exemplo, Telegram, WhatsApp, e-mail ou Discord — recomenda-se armazenar tokens e chaves no `.env` e nunca versionar credenciais.
-
-Exemplo de configuração futura:
-
-```env
-NOTIFICATION_TOKEN=seu-token-aqui
-NOTIFICATION_CHAT_ID=seu-destino-aqui
-```
-
-## Desenvolvimento e melhorias planejadas
-
-- Integrar a notificação com um canal externo.
-- Adicionar testes automatizados para o scraper e o formatador.
-- Validar alterações no formato da resposta da API.
-- Adicionar logging estruturado no lugar de `print`.
-- Permitir configurar moedas, destino da mensagem e intervalo de execução.
-- Criar uma execução agendada com cron, Task Scheduler ou GitHub Actions.
-- Adicionar um ` .gitignore` com ambiente virtual, cache do Python e arquivos de configuração local, caso ainda não exista uma política equivalente no projeto.
+- `alertas`: lista de alertas de preço por chat.
+- `assinantes`: lista de chats inscritos para o resumo diário.
 
 ## Solução de problemas
 
 ### `ModuleNotFoundError`
 
-Verifique se o ambiente virtual está ativo e instale as dependências:
+Verifique se o ambiente virtual está ativo e se as dependências foram instaladas:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Falha ao obter cotações
+### Falha ao consultar cotações
 
-Confirme sua conexão com a internet e se a AwesomeAPI está acessível. A aplicação usa timeout de 10 segundos e retorna `None` quando ocorre um erro de requisição.
+Confirme sua conexão com a internet e a disponibilidade da AwesomeAPI. A aplicação usa timeout de 10 segundos e retorna erro caso a API não responda corretamente.
 
-### A mensagem não é enviada para um aplicativo
+### Bot não responde no Telegram
 
-Esse comportamento é esperado na implementação atual: `enviar_notificacao()` apenas imprime a mensagem no terminal. É necessário implementar um cliente para o serviço escolhido.
+Verifique se:
+
+- o token do bot foi configurado corretamente no `.env`;
+- o bot foi iniciado com `python main.py`;
+- o bot já foi criado no Telegram e o token corresponde ao bot correto.
+
+### Mensagem não enviada
+
+Se o valor do `TELEGRAM_TOKEN` ou do `TELEGRAM_CHAT_ID` estiver ausente ou incorreto, a aplicação não conseguirá enviar mensagens.
+
+## Melhorias e próximos passos
+
+- adicionar logs mais estruturados;
+- revisar e separar melhor o fluxo de envio direto do fluxo do bot Telegram;
+- criar testes automatizados para scraper e formatação de mensagens;
+- permitir configuração de moedas e horários por ambiente;
+- expandir o suporte para outros canais de notificação além do Telegram;
+- criar um padrão de `env.example` para facilitar onboarding de novos colaboradores.
 
 ## Licença
 
-Nenhuma licença foi definida no repositório até o momento. Consulte o proprietário antes de reutilizar ou distribuir o código em outros projetos.
+Este repositório não possui licença definida no momento. Antes de reutilizar ou redistribuir o código, consulte o proprietário do projeto.
