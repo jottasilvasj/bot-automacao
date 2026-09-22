@@ -70,7 +70,7 @@ async def ajuda(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Comandos disponíveis:\n\n"
         "/start - cotações atuais (dólar, euro, bitcoin)\n"
         "/menu - menu com botões\n"
-        "/converter quantidade/moedaS - ex: /converter 100 USD\n"
+        "/converter quantidade/moedas - ex: /converter 100 USD\n"
         "/alerta moeda/valor - ex: /alerta dolar/5.30\n"
         "/meusalertas - lista seus alertas ativos\n"
         "/cancelaralerta moeda - cancela um alerta\n"
